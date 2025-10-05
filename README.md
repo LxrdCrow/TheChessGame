@@ -17,17 +17,44 @@ The main objectives of this project are:
 ## Repository Structure
 
 ```
-ChessGame-py/
-├── src/
-│   ├── game/
-│   ├── pieces/
-│   └── utils/
-├── tests/
+chessgame-py/
+├── .gitignore
 ├── README.md
-└── requirements.txt
+├── LICENSE
+├── requirements.txt         # es. pygame==x.y.z
+├── pyproject.toml / setup.cfg (opzionale)
+├── src/
+│   ├── __main__.py          # entrypoint -> avvia il gioco
+│   ├── config.py            # costanti (board size, colors, ecc.)
+│   ├── app.py               # inizializza pygame, loop principale
+│   ├── game/                # LOGICA del gioco (decoupled dalla UI)
+│   │   ├── __init__.py
+│   │   ├── board.py         # rappresentazione della scacchiera (8x8), getter/setter
+│   │   ├── pieces.py        # classi Piece: King, Queen, Rook, Bishop, Knight, Pawn
+│   │   ├── move.py          # dataclass Move, utilità su mosse
+│   │   ├── rules.py         # regole globali (castling, en-passant, promotion, check)
+│   │   ├── costants.py      # valori e costanti globali (dimensioni, colori ecc.)
+│   │   ├── game_state.py    # stato partita: turni, storico mosse, castling rights, ecc.
+│   │   ├── notation.py      # conversione (ranks/files) ↔ algebraic "e4"
+│   │   └── player.py        # logica giocatore (turno, colore)
+│   ├── ui/                  # tutto ciò che riguarda rendering e input
+│   │   ├── __init__.py
+│   │   ├── renderer.py      # disegna scacchiera, pezzi, highlights
+│   │   ├── input_handler.py # mouse clicks, drag&drop, selezione
+│   │   └── hud.py           # HUD: move list, pulsanti (undo, restart), timer opz.
+│   └── utils/
+│       └── assets.py  # caricamento immagini gioco
+├── tests/                   # unit tests (pytest)
+│   ├── test_board.py
+│   ├── test_pieces.py
+│   └── test_rules.py
+└── docs/
+    ├── design.md
+    └── rules.md
+
 ```
 
 
 ## Work in progress
 
-- Building the logic game (/game __init__.py, board, game_state, move, pieces, rules)
+- Building the logic game (/game __init__.py, board, game_state, move, pieces, rules, player)
