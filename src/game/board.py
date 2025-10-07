@@ -1,6 +1,6 @@
 import pygame as pg
-from src.game.constants import TILE_SIZE, BOARD_WIDTH, BOARD_HEIGHT, WHITE_TILE_COLOR, BLACK_TILE_COLOR
-from src.game.piece import Piece
+from src.game.costants import TILE_SIZE, BOARD_WIDTH, BOARD_HEIGHT, WHITE_TILE_COLOR, BLACK_TILE_COLOR
+from src.game.pieces import Piece
 from src.game.player import Player
 from utils.assets import load_image
 
@@ -96,6 +96,3 @@ class Board:
         TODO: Prima creare rules.py e spostare la logica lì.
         """
         return True
-
-
-        
