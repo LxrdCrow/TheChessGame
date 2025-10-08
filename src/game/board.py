@@ -2,7 +2,7 @@ import pygame as pg
 from src.game.costants import TILE_SIZE, BOARD_WIDTH, BOARD_HEIGHT, WHITE_TILE_COLOR, BLACK_TILE_COLOR
 from src.game.pieces import Piece
 from src.game.player import Player
-from utils.assets import load_image
+from utils.assets import get_piece_image
 
 class Board:
     def __init__(self):
@@ -15,18 +15,8 @@ class Board:
         self.players = [Player("white"), Player("black")]
         self.current_player = self.players[0]  # White starts first
 
-        # Dictionary to store preloaded piece images
-        self.images = {}
-        self.load_images()
-
         # Load all pieces on the board
         self.load_board()
-
-    def load_images(self):
-        """Load all piece images once."""
-        for color in ["white", "black"]:
-            for piece_type in ["pawn", "rook", "knight", "bishop", "queen", "king"]:
-                self.images[f"{color}_{piece_type}"] = load_image(f"{color}_{piece_type}.png")
 
     def load_board(self):
         """Place all pieces on the board in their starting positions."""
@@ -43,6 +33,7 @@ class Board:
             for pos in positions:
                 color = 'white' if pos[0] < 2 else 'black'
                 piece = Piece(piece_type, color, pos)
+                piece.image = get_piece_image(color, piece_type)  # Load image from assets
                 self.pieces.append(piece)
                 self.tiles[pos[0]][pos[1]] = piece
 
@@ -54,8 +45,8 @@ class Board:
                 pg.draw.rect(screen, tile_color, (col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE))
 
                 piece = self.tiles[row][col]
-                if piece:
-                    screen.blit(self.images[f"{piece.color}_{piece.type}"], (col * TILE_SIZE, row * TILE_SIZE))
+                if piece and piece.image:
+                    screen.blit(piece.image, (col * TILE_SIZE, row * TILE_SIZE))
 
     def select_piece(self, position):
         """Select a piece on the board if it belongs to the current player."""
@@ -79,7 +70,6 @@ class Board:
                 self.tiles[start_row][start_col] = None
                 piece.position = (end_row, end_col)
                 self.selected_piece = None
-
                 self.switch_turn()  # Switch turn after a valid move
                 return True
 
@@ -88,6 +78,7 @@ class Board:
     def switch_turn(self):
         """Switch the current player."""
         self.current_player = self.players[1] if self.current_player == self.players[0] else self.players[0]
+
 
     def is_valid_move(self, piece, start_pos, end_pos):
         """

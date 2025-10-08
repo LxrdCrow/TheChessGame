@@ -1,5 +1,6 @@
 import pygame as pg
 from src.game.costants import TILE_SIZE, BOARD_WIDTH, BOARD_HEIGHT
+from utils.assets import get_piece_image
 
 class Piece:
     def __init__(self, piece_type, color, position):
@@ -7,6 +8,7 @@ class Piece:
         self.color = color      # 'white' or 'black'
         self.position = position  # (row, col)
         self.has_moved = False
+        self.image = get_piece_image(color, piece_type)
 
     def _is_on_board(self, r, c):
         # Check if the position is within the board boundaries
