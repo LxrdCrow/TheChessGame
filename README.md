@@ -75,4 +75,4 @@ chessgame-py/
 
 ## Work in progress
 
-- Building the logic game (/game __init__.py, board, game_state, move, pieces, rules, player)
+- Building UI Structure (hud.py, input_handler.py, renderer.py)
