@@ -1,5 +1,5 @@
 import pygame as pg
-from src.game.costants import (
+from constants import (
     TILE_SIZE, BOARD_WIDTH, BOARD_HEIGHT,
     WHITE_TILE_COLOR, BLACK_TILE_COLOR
 )
