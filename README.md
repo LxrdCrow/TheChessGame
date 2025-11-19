@@ -75,4 +75,4 @@ chessgame-py/
 
 ## Work in progress
 
-- Building UI Structure (hud.py, input_handler.py, renderer.py)
+- Building UI Structure (renderer.py)

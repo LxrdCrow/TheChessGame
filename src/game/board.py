@@ -1,5 +1,5 @@
 import pygame as pg
-from constants import (
+from src.game.constants import (
     TILE_SIZE, BOARD_WIDTH, BOARD_HEIGHT,
     WHITE_TILE_COLOR, BLACK_TILE_COLOR
 )
@@ -21,12 +21,18 @@ class Board:
         self.current_player = self.players[0]  # White starts first
 
         # Special rule states
-        self.en_passant_target = None  # position where en passant is allowed
-        self.last_move = None  # store last move for en passant logic
+        self.en_passant_target = None  # position where en passant capture would land (row, col) or None
+        self.last_move = None  # store last move (piece, start_pos, end_pos) for HUD/debug
+        self.captured_pieces = []  # list of captured piece objects
+
+        # optional: castling rights if you want to track them on Board
+        self.castling_rights = {
+            "white_k": True, "white_q": True,
+            "black_k": True, "black_q": True
+        }
 
         # Load all pieces on the board
         self.load_board()
-
 
     # INITIAL SETUP
 
@@ -67,6 +73,10 @@ class Board:
     def select_piece(self, position):
         """Select a piece on the board if it belongs to the current player."""
         row, col = position
+        if not (0 <= row < BOARD_HEIGHT and 0 <= col < BOARD_WIDTH):
+            self.selected_piece = None
+            return
+
         piece = self.tiles[row][col]
         if piece and piece.color == self.current_player.color:
             self.selected_piece = piece
@@ -78,6 +88,13 @@ class Board:
         start_row, start_col = start_pos
         end_row, end_col = end_pos
 
+        # Basic bounds check
+        if not (0 <= start_row < BOARD_HEIGHT and 0 <= start_col < BOARD_WIDTH):
+            return False
+
+        if not (0 <= end_row < BOARD_HEIGHT and 0 <= end_col < BOARD_WIDTH):
+            return False
+
         piece = self.tiles[start_row][start_col]
         target = self.tiles[end_row][end_col]
 
@@ -88,11 +105,26 @@ class Board:
         if not Rules.is_valid_move(self, piece, start_pos, end_pos):
             return False
 
-        # Handle en passant capture
-        if piece.type == "pawn" and self.en_passant_target == (end_row, end_col):
-            capture_row = start_row if piece.color == "white" else start_row
-            capture_row += -1 if piece.color == "white" else 1
+        # Prepare for history/last_move: record captured piece (normal capture)
+        captured = target
+
+        # Handle en passant capture:
+        # If the pawn moves to en_passant_target, the captured pawn is on the same column
+        # but on the row just behind the landing square.
+        if piece.type.lower() == "pawn" and self.en_passant_target == (end_row, end_col) and target is None:
+            if piece.color == "white":
+                capture_row = end_row + 1
+            else:
+                capture_row = end_row - 1
+            captured = self.tiles[capture_row][end_col]
+            # remove captured pawn
             self.tiles[capture_row][end_col] = None
+            if captured:
+                self.captured_pieces.append(captured)
+
+        # Normal capture: add to captured_pieces if present
+        if target is not None:
+            self.captured_pieces.append(target)
 
         # Move the piece
         self.tiles[end_row][end_col] = piece
@@ -100,27 +132,61 @@ class Board:
         piece.position = (end_row, end_col)
         piece.has_moved = True
 
-        # Handle pawn promotion
+        # Handle pawn promotion (Rules.check_pawn_promotion may change piece.type)
         Rules.check_pawn_promotion(self, piece)
 
-        # Handle castling (move the rook as well)
-        if piece.type == "king" and abs(start_col - end_col) == 2:
+        # Handle castling (move the rook as well) and update castling rights
+        castle_data = None
+        if piece.type.lower() == "king" and abs(start_col - end_col) == 2:
             rook_start_col = 0 if end_col < start_col else 7
             rook_end_col = 3 if end_col < start_col else 5
             rook = self.tiles[start_row][rook_start_col]
+            # move rook
             self.tiles[start_row][rook_start_col] = None
             self.tiles[start_row][rook_end_col] = rook
-            rook.position = (start_row, rook_end_col)
-            rook.has_moved = True
+            if rook:
+                rook.position = (start_row, rook_end_col)
+                rook.has_moved = True
+            # update castling rights for this color
+            if piece.color == "white":
+                self.castling_rights["white_k"] = False
+                self.castling_rights["white_q"] = False
+            else:
+                self.castling_rights["black_k"] = False
+                self.castling_rights["black_q"] = False
+            castle_data = {"rook_start": rook_start_col, "rook_end": rook_end_col}
+
+        # If a rook or king moved normally, clear appropriate castling rights
+        if piece.type.lower() == "king":
+            if piece.color == "white":
+                self.castling_rights["white_k"] = False
+                self.castling_rights["white_q"] = False
+            else:
+                self.castling_rights["black_k"] = False
+                self.castling_rights["black_q"] = False
+        if piece.type.lower() == "rook":
+            if start_row == 7 and start_col == 0:  # white queenside rook initial pos
+                self.castling_rights["white_q"] = False
+            if start_row == 7 and start_col == 7:  # white kingside rook initial pos
+                self.castling_rights["white_k"] = False
+            if start_row == 0 and start_col == 0:  # black queenside rook initial pos
+                self.castling_rights["black_q"] = False
+            if start_row == 0 and start_col == 7:  # black kingside rook initial pos
+                self.castling_rights["black_k"] = False
 
         # Update en passant target square
         self.update_en_passant(piece, start_pos, end_pos)
 
-        # Switch turn
-        self.switch_turn()
+        # Store last move with useful metadata
+        self.last_move = {
+            "piece": piece,
+            "start": start_pos,
+            "end": end_pos,
+            "captured": captured,
+            "castle": castle_data
+        }
 
-        # Store last move
-        self.last_move = (piece, start_pos, end_pos)
+        # Deselect
         self.selected_piece = None
 
         return True
@@ -128,12 +194,16 @@ class Board:
     def update_en_passant(self, piece, start_pos, end_pos):
         """Set en passant target if a pawn moved two squares."""
         self.en_passant_target = None  # reset by default
-        if piece.type == "pawn":
+        if piece.type.lower() == "pawn":
             start_row, start_col = start_pos
-            end_row, _ = end_pos
+            end_row, end_col = end_pos
+            # if pawn moved two squares, store the square it jumped over
             if abs(end_row - start_row) == 2:
                 mid_row = (start_row + end_row) // 2
                 self.en_passant_target = (mid_row, start_col)
+            else:
+                # otherwise reset
+                self.en_passant_target = None
 
     def switch_turn(self):
         """Switch the current player."""
