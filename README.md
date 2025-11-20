@@ -75,4 +75,4 @@ chessgame-py/
 
 ## Work in progress
 
-- Building UI Structure (renderer.py)
+- Building Game final logic (config.py, testing, docs, assets.py)

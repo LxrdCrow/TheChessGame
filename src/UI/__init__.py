@@ -1,5 +1,4 @@
-from .renderer import Renderer
-from .input_handler import InputHandler
-from .hud import HUD
+from src.UI.renderer import Renderer
+from src.UI.hud import HUD
 
-__all__ = ["Renderer", "InputHandler", "HUD"]
+__all__ = ["Renderer", "HUD"]

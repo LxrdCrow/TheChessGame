@@ -1,6 +1,6 @@
 import pygame as pg
-from constants import TILE_SIZE, BOARD_WIDTH, BOARD_HEIGHT
-from utils.assets import get_piece_image
+from src.game.constants import TILE_SIZE, BOARD_WIDTH, BOARD_HEIGHT
+from src.utils.assets import get_piece_image
 
 class Piece:
     def __init__(self, piece_type, color, position):

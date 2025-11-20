@@ -1,12 +1,13 @@
 import pygame as pg
 
 class Player:
-    def __init__(self):
+    def __init__(self, color: str):
         self.position = pg.Vector2(100, 100)
         self.velocity = pg.Vector2(0, 0)
         self.speed = 5
         self.size = pg.Vector2(50, 50)
-        self.color = (0, 255, 0)  # Green color
+        self.color = color  
+        self.captured_pieces = []
 
     def handle_input(self):
         keys = pg.key.get_pressed()

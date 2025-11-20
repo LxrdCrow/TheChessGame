@@ -1,9 +1,10 @@
 import pygame as pg
 from src.game.board import Board
 from src.game.game_state import GameState
-from UI.hud import HUD
-from UI.renderer import Renderer
-from game.constants import TILE_SIZE, BOARD_WIDTH, BOARD_HEIGHT
+from src.UI.hud import HUD
+from src.UI.renderer import Renderer
+from src.game.constants import TILE_SIZE, BOARD_WIDTH, BOARD_HEIGHT
+from src.utils.assets import init_assets
 
 WINDOW_SIZE = (TILE_SIZE * BOARD_WIDTH, TILE_SIZE * BOARD_HEIGHT)
 
@@ -32,7 +33,6 @@ def run_game():
            
             screen.fill((30, 30, 30))  
             renderer.draw_board(screen, board)  
-            renderer.draw_pieces(screen, board)  
             hud.draw(screen)                    
 
             pg.display.flip()

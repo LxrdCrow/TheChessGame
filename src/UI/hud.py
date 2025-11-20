@@ -1,7 +1,7 @@
 import pygame as pg
 from typing import Optional, Iterable, Tuple
 from src.game.constants import TILE_SIZE, BOARD_WIDTH, BOARD_HEIGHT, WHITE_TILE_COLOR, BLACK_TILE_COLOR
-from utils.assets import get_piece_images
+from src.utils.assets import get_piece_image
 
 class HUD:
     """
@@ -39,7 +39,7 @@ class HUD:
             ("wN", "bN"),  # Knights
             ("wP", "bP"),  # Pawns
         ]
-        self.legend_images = {f"{c}_{p}": get_piece_images(c, p) for c, p in self.legend_order}
+        self.legend_images = {f"{c}_{p}": get_piece_image(c, p) for c, p in self.legend_order}
 
     def _prepare_highlight_surfaces(self):
         """ Create semi-transparent surfaces for highlighting squares"""
@@ -59,7 +59,7 @@ class HUD:
     def draw (self, screen: pg.Surface):
         """ Main draw method. Call every frame after the board/renderer draws"""
         # draw current turn
-        self._draw_current_turn(screen)
+        self._draw_turn(screen)
 
         # draw legend on the right
         self._draw_legend(screen)
@@ -143,8 +143,14 @@ class HUD:
             screen.blit(surf, (x, y))
             return
         
-        # Optional helpers you can call from input handler to show messages
-        def show_message(self, screen: pg.Surface, text: str, pos: Tuple[int, int] = (10, 40), ttl: float = 2.0):
+       
+    
+    def show_message(self, screen: pg.Surface, text: str, pos: Tuple[int, int] = (10, 40), ttl: float = 2.0):
             """ Display a temporary message on the HUD at given position for ttl seconds"""
             surf = self.font.render(text, True, pg.Color("yellow"))
             screen.blit(surf, pos)
+
+
+    def handle_event(self, event: pg.event.Event):
+            """ Handle events if needed (e.g., for clicking on HUD elements)"""
+            pass

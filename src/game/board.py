@@ -6,7 +6,7 @@ from src.game.constants import (
 from src.game.pieces import Piece
 from src.game.player import Player
 from src.game.rules import Rules
-from utils.assets import get_piece_image
+from src.utils.assets import get_piece_image
 
 
 class Board:

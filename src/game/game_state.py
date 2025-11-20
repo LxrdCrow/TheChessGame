@@ -1,8 +1,9 @@
+import pygame as pg
 from typing import Optional, Tuple, List, Dict, Any
 from src.game.board import Board
 from src.game.rules import Rules
 from src.game.constants import TILE_SIZE, BOARD_WIDTH, BOARD_HEIGHT
-import pygame as pg
+
 
 Position = Tuple[int, int]  # (row, col)
 
